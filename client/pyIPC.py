@@ -26,4 +26,4 @@ def send(weights=[3.14, 6.28]):
     message = socket.send_string(str(msgStr))
     print("Sent Message")
 
-send()
+#send()

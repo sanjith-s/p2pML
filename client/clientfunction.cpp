@@ -15,11 +15,11 @@ std::string Client::get_output() {
     std::string params;
     while (input.length() == 0) {
         std::getline(std::cin >> std::ws, input);
-        params = getParams();
-        std::cout << params << std::endl;
+        //params = getParams();
+        //std::cout << input << std::endl;
     }
 
-    return params;
+    return input;
 }
 
 void Client::operate() {

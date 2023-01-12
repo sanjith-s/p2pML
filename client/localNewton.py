@@ -11,7 +11,7 @@ from pyIPC import send
 
 
 # DATASET = 'Datasets/func1.csv'
-DATASET = 'Datasets/func2.csv'  # 3x + 6
+DATASET = 'data.csv'  # 3x + 6
 
 # FUNCTIONS = [lambda x: 1, lambda x: sp.cos(x), lambda x: 1/(x ** 2 + 1), lambda x: x**4]
 
@@ -19,6 +19,8 @@ ALPHA = 0.005
 GAMMA = 0.01
 
 df = pd.read_csv(DATASET)
+
+
 S = len(df)
 
 
@@ -27,7 +29,6 @@ y = df['y'].values
 
 ATTRS = 1 + 1
 
-print(df.head(6))
 
 S = len(df)
 
@@ -38,7 +39,7 @@ def error(X, Y, W):
     
 #     norm = GAMMA / Integer(2) * sum([x ** 2 for x in W])
     
-    return base# + norm
+    return base # + norm
 
 
 weights = np.random.normal(size=ATTRS)
@@ -82,7 +83,7 @@ for _ in range(100):
     alpha = ALPHA  # TODO: use formula
     
     weights -= alpha * update
-
+    print(weights)
     send(weights)
 
 
