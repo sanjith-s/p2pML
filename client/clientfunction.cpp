@@ -7,19 +7,18 @@
 #include <future>
 #include <cstring>
 #include <vector>
-
-//#include "pyIPC.h"
+#include "pyIPC.h"
 
 std::string Client::get_output() {
     std::string input{};
     std::string params;
     while (input.length() == 0) {
-        std::getline(std::cin >> std::ws, input);
-        //params = getParams();
-        //std::cout << input << std::endl;
+        //std::getline(std::cin >> std::ws, input);
+        params = getParams();
+        std::cout << params << std::endl;
     }
 
-    return input;
+    return params;
 }
 
 void Client::operate() {

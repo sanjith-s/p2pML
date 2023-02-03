@@ -4,7 +4,7 @@
 #include <zmqpp/zmqpp.hpp>
 #include <string>
 #include <iostream>
-#include "message.pb.h"
+//#include "message.pb.h"
 
 using namespace std;
 
@@ -16,11 +16,11 @@ string getParams() {
     zmqpp::socket_type type = zmqpp::socket_type::pull;
     zmqpp::socket socket (context, type);
 
-    cout << "Binding to " << endpoint << "..." << endl;
+//    cout << "Binding to " << endpoint << "..." << endl;
     socket.bind(endpoint);
 
 
-    cout << "Receiving message..." << endl;
+//    cout << "Receiving message..." << endl;
 
 //    char buff [256];
 //    int nbytes = zmq_recv (socket, buff, 256, 0); assert (nbytes != -1);
@@ -32,7 +32,7 @@ string getParams() {
 //    response.ParseFromString(message);
 
 
-    cout << "Received message" << endl;
+//    cout << "Received message" << endl;
 
 //    vector<float> result;
 //    for(int i=0; i<response.param_size(); ++i) {
