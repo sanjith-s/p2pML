@@ -11,7 +11,7 @@ from pyIPC import send
 
 
 # DATASET = 'Datasets/func1.csv'
-DATASET = 'data.csv'  # 3x + 6
+DATASET = 'df1.csv'  # 3x + 6
 
 # FUNCTIONS = [lambda x: 1, lambda x: sp.cos(x), lambda x: 1/(x ** 2 + 1), lambda x: x**4]
 
@@ -24,8 +24,8 @@ df = pd.read_csv(DATASET)
 S = len(df)
 
 
-x = df['x'].values.reshape((S, 1))
-y = df['y'].values
+x = df.iloc[:, 0].values.reshape((S, 1))
+y = df.iloc[:,-1].values
 
 ATTRS = 1 + 1
 
@@ -64,6 +64,7 @@ hessian_eq = derive_by_array(derive_by_array(f, W), W)
 gradient_general = lambdify(W + X + [Y], gradient_eq, "numpy")
 hessian_general = lambdify(W + X + [Y], hessian_eq, "numpy")
 
+weights
 for _ in range(100):    
     final_grad = (np.zeros((ATTRS)))
     final_hess = (np.zeros((ATTRS, ATTRS)))
@@ -84,10 +85,7 @@ for _ in range(100):
     
     weights -= alpha * update
     print(weights)
-    send(weights)
+    #send(weights)
 
-
-
-
-
+print("Final Weigths: ", weights)
 
