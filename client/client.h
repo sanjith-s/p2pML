@@ -20,9 +20,11 @@ private:
 
     std::vector<SOCKET> connections{};
     std::future<output_type> future;
+//    std::future<int> ack;
 
     void initialize_socket(int domain, int service, int protocol);
     output_type get_output();
+//    int ack_timeout();
 
 public:
     std::vector<std::string> peers{};

@@ -65,7 +65,7 @@ gradient_general = lambdify(W + X + [Y], gradient_eq, "numpy")
 hessian_general = lambdify(W + X + [Y], hessian_eq, "numpy")
 
 weights
-for _ in range(100):    
+for _ in range(100000):
     final_grad = (np.zeros((ATTRS)))
     final_hess = (np.zeros((ATTRS, ATTRS)))
     
@@ -85,7 +85,7 @@ for _ in range(100):
     
     weights -= alpha * update
     print(weights)
-    #send(weights)
+    send(weights)
 
 print("Final Weigths: ", weights)
 
