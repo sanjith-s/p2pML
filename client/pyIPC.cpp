@@ -1,46 +1,79 @@
 //
 // Created by ubuntu on 18/12/22.
 //
+#include "pyIPC.h"
+#include "client.h"
 #include <zmqpp/zmqpp.hpp>
 #include <string>
 #include <iostream>
 //#include "message.pb.h"
 
-using namespace std;
+std::pair<zmqpp::context, zmqpp::socket_type> connectPy() {
+    zmqpp::context context{};
+    zmqpp::socket_type type {zmqpp::socket_type::pair};
 
-string getParams() {
-    const string endpoint = "tcp://*:1101";
+    return std::pair{std::move(context), type};
+}
 
-    zmqpp::context context;
+std::string vector_to_string(const std::vector<std::string> &vector) {
+    std::string ret_val{"["};
+    bool first{true};
+    for (const auto &i : vector) {
+        if (!first) ret_val.append(",");
+        else first = false;
+        ret_val.append(i);
+    }
+    ret_val.append("]");
 
-    zmqpp::socket_type type = zmqpp::socket_type::pull;
-    zmqpp::socket socket (context, type);
+    return ret_val;
+}
 
-//    cout << "Binding to " << endpoint << "..." << endl;
-    socket.bind(endpoint);
+Client::MessageDirection contactIPC(zmqpp::socket &socket, const Client &client, Client::MessageType &type, std::string &message) {
+    socket.receive(message, true);
 
+    Client::MessageDirection direction{};
 
-//    cout << "Receiving message..." << endl;
+    if (message == "GET") direction = Client::GET;
+    else if (message == "SEND") direction = Client::SEND;
+    else return Client::ERROR;
 
-//    char buff [256];
-//    int nbytes = zmq_recv (socket, buff, 256, 0); assert (nbytes != -1);
-
-    string message;
     socket.receive(message);
 
-//    ipc::Values response;
-//    response.ParseFromString(message);
+    if (message == "WEIGHTS") type = Client::WEIGHTS;
+    else if (message == "LOSS") type = Client::LOSS;
+    else if (message == "ACK") type = Client::ACK;
+    else return Client::ERROR;
 
+    if (direction == Client::SEND) socket.receive(message);
+    else socket.send(std::to_string(client.peers.size()));
 
-//    cout << "Received message" << endl;
+    return direction;
 
-//    vector<float> result;
-//    for(int i=0; i<response.param_size(); ++i) {
-//        printf("Index(%d): Value(%f)\n", i, response.param(i));
-//        result.push_back(response.param(i));
+//    if (message == "GET_WEIGHTS") {
+//        socket.send(vector_to_string(client.stored));
+//        socket.send(std::to_string(client.peers.size()));
+//        return Client::GET_WEIGHTS;
+//    } else if (message == "GET_LOSS") {
+//        socket.send(std::to_string(client.peers.size()));
+//        return Client::GET_LOSS;
+//    } else if (message == "GET_ACK") {
+//        socket.send(std::to_string(client.peers.size()));
+//        return Client::GET_ACK;
+//    } else if (message == "SEND_WEIGHTS") {
+//        socket.receive(message);
+//        return Client::SEND_WEIGHTS;
+//    } else if (message == "SEND_LOSS") {
+//        socket.receive(message);
+//        return Client::SEND_LOSS;
+//    } else if (message == "SEND_ACK") {
+//        socket.receive(message);
+//        return Client::SEND_ACK;
+//    } else {
+//        return Client::ERROR;
 //    }
-//
-//    cout << "Finished." << endl;
+}
 
-    return message;
+void sendIPC(zmqpp::socket &socket, const std::string &message) {
+    std::cout << message << '\n';
+    socket.send(message);
 }

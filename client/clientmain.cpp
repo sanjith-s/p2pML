@@ -1,6 +1,7 @@
 #include "network_headers.h"
 #include "constants.h"
 #include "client.h"
+#include <zmqpp/zmqpp.hpp>
 
 void chat(Client &client) {
     while (true) {
@@ -25,6 +26,7 @@ int main(int argc, char *argv[]) {
             0,
             inet_addr(server_ip.data()),
             constants::port,
+            zmqpp::socket_type::pair
     };
 
     int nodes{};

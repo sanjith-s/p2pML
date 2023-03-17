@@ -9,67 +9,70 @@
 #include <vector>
 #include "pyIPC.h"
 
-std::string Client::get_output() {
+std::pair<int, Client::output_type> Client::get_output() {
     std::string params{};
+
+    int type;
     while (params.length() == 0) {
 //        std::getline(std::cin >> std::ws, params);
-        params = getParams();
-//        std::cout << params << "THIS IS PARAMETERS" << std::endl;
+//        params = contactIPC(py_socket, *this, type);
+//        std::cout << params;
     }
 
-    return params;
-}
-
-int ack_timeout() {
-    usleep(100000);
-    return 1;
+    return std::make_pair(type, params);
 }
 
 void Client::operate() {
-    if (future.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
-        output_type output = future.get();
-        int len = static_cast<int>(output.size()) + 1;
-        std::cout << len << "\n";
+    std::string message{};
+    MessageType type{};
+    Client::MessageDirection command {contactIPC(py_socket, *this, type, message)};
 
-        for (auto i : connections) {
-            std::cout << output << std::endl;
+    if (command == Client::SEND) {
+        int len = static_cast<int>(message.size()) + 1;
+        //        std::cout << len << "\n";
 
+        for (auto i: connections) {
+            std::cout << "SEND " << type << " " << message << std::endl;
+
+            send(i, reinterpret_cast<const char *>(&type), sizeof(len), 0);
             send(i, reinterpret_cast<const char *>(&len), sizeof(len), 0);
-
-            std::future<int> ack = std::async(ack_timeout);
-
-            int ack_store{};
-            while (
-                    recv(i, reinterpret_cast<char *>(&ack_store), sizeof(int), 0) == -1 &&
-                    ack.wait_for(std::chrono::seconds(0)) != std::future_status::ready
-                    );
-
-            if (ack.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
-                std::cout << "NOT ACKED" << std::endl;
-                std::exit(1);
-            }
-
-            send(i, output.c_str(), len, 0);
+            send(i, message.c_str(), len, 0);
         }
 
-        future = std::async(&Client::get_output, this);
-    }
+//            future = std::async(&Client::get_output, this);
+    } else if (command == Client::GET) {
+        std::size_t length{connections.size()};
+        bool *done = new bool[length]{false};
 
-    for (int i = 0; i < connections.size(); i++) {
-        SOCKET socket = connections[i];
-        int len{0};
-        int status = recv(socket, reinterpret_cast<char *>(&len), sizeof(len), 0);
-        if (status != -1) {
-            for (auto j : peers) std::cout << connections.size() << "\n";
+        bool flag{false};
+        while (!flag) {
+            for (std::size_t i = 0; i < length; i++) {
+                if (done[i]) continue;
 
-            std::cout << len << std::endl;
+                SOCKET socket = connections[i];
+                Client::MessageType recv_type{};
+                int len{};
+                //            int status = recv(socket, reinterpret_cast<char *>(&recv_type), sizeof(len), 0);
+                if (recv(socket, reinterpret_cast<char *>(&recv_type), sizeof(recv_type), 0) != -1) {
+                    if (recv_type != type) std::exit(1);
 
-            send(socket, reinterpret_cast<const char *>(&len), sizeof(len), 0);
+                    while (recv(socket, reinterpret_cast<char *>(&len), sizeof(len), 0) == -1);
 
-            char buffer[len];
-            std::memset(buffer, 0, len);
-            while (recv(socket, buffer, len, 0) == -1);
-            std::cout << peers[i] << " says: " << buffer << std::endl;
+                    for (auto j: peers) std::cout << connections.size() << "\n";
+                    char buffer[len];
+                    std::memset(buffer, 0, len);
+                    while (recv(socket, buffer, len, 0) == -1);
+
+                    std::string output{buffer};
+                    std::cout << "RECV " << output << std::endl;
+                    sendIPC(py_socket, output);
+
+                    done[i] = true;
+                }
+            }
+
+            flag = true;
+            for (std::size_t i = 0; i < length; i++) flag &= done[i];
         }
     }
 }

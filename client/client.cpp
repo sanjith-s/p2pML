@@ -49,6 +49,8 @@ void Client::accept(int count) {
         peers.emplace_back(ip);
 
         std::cout << "Accepted " << ip << '\n';
+
+//        stored.emplace_back(default_stored);
     }
 }
 
@@ -71,6 +73,8 @@ void Client::accept_new_node() {
             new_addr.sin_port = htons(constants::recv_port);
             new_addr.sin_addr.s_addr = inet_addr(new_ip);
 
+            std::cout << "Adding node" << std::endl;
+
             if (connect(sock,
                         reinterpret_cast<sockaddr *>(&new_addr),
                         sizeof(new_addr)) < 0) {
@@ -85,6 +89,8 @@ void Client::accept_new_node() {
             peers.emplace_back(new_ip);
 
             std::cout << "Added " << new_ip << '\n';
+
+//            stored.emplace_back(default_stored);
         }
     }
 }

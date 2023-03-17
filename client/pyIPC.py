@@ -1,33 +1,49 @@
 import zmq
 import time
 import json
+import ast
 
 
 # import message_pb2
 
-
-def send(weights=[3.14, 6.28]):
+def connectCPP():
     context = zmq.Context()
-
-    #  Socket to talk to server
-    print("Connecting to server…")
-    socket = context.socket(zmq.PUSH)
+    print("Connecting to CPP…")
+    socket = context.socket(zmq.PAIR)
     socket.connect("tcp://127.0.0.1:1101")
-    # socket.bind("tcp://*:1101")
 
-    print("Sending message..")
+    return socket
 
-    #     msg = message_pb2.Values()
-    # # msg.param.append(3.14)
-    #     msg.param.extend(weights)
-    #
-    #     msgStr = msg.SerializeToString()
 
-    # print(type(msgStr))
+def send(socket: zmq.Socket, data, data_type):
 
-    # message = socket.send_string(str(msgStr))
-    msgStr = json.dumps(weights.tolist())
-    message = socket.send_string(msgStr)
-    print("Sent Message")
+    # print("Sending message..")
+    socket.send_string('SEND')
+    socket.send_string(data_type)
 
-# send()
+    socket.send_string(data)
+    # print(msg_str)
+    # print(message)
+    # print("Sent Message")
+
+
+def recv(socket: zmq.Socket, data_type: str):
+
+    socket.send_string('GET')
+    socket.send_string(data_type)
+
+    # print("Receiving message..")
+
+    length = int(socket.recv_string())
+
+    output = []
+    for _ in range(length):
+        output += [ast.literal_eval(socket.recv_string())]
+
+    # message = socket.recv_string()
+    # output = ast.literal_eval(message)
+
+    print(output)
+    # print("Received Message")
+
+    return output
