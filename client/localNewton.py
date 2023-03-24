@@ -12,8 +12,8 @@ from sympy.vector import CoordSys3D, Del
 from pyIPC import send, recv, connectCPP
 
 
-DATASET = '/home/mona/Desktop/Datasets/cosdataset.csv'
-# DATASET = 'node1_train.csv'  # 3x + 6
+# DATASET = 'Datasets/func1.csv'
+DATASET = 'node2_train.csv'  # 3x + 6
 
 # FUNCTIONS = [lambda x: 1, lambda x: sp.cos(x), lambda x: 1/(x ** 2 + 1), lambda x: x**4]
 
@@ -29,12 +29,12 @@ df = pd.read_csv(DATASET)
 S = len(df)
 
 
-x = df.iloc[:, 0].values.reshape((S, 1))
+x = df.iloc[:, :-1].values.reshape((S, 1))
 y = df.iloc[:,-1].values
 
-dfTest = pd.read_csv(DATASET)
-testX = dfTest.iloc[:,:-1].values.reshape((S, 1))
-testY = dfTest.iloc[:,-1].values
+dfTest = pd.read_csv('node2_test.csv')
+testX = dfTest.iloc[:, :-1].values.reshape((S, 1))
+testY = dfTest.iloc[:, -1].values
 
 ATTRS = 1 + 1
 
@@ -43,20 +43,21 @@ S = len(df)
 
 
 def error(X, Y, W):
-    predicted = W[0] + sum([X[i-1] * W[i] for i in range(1, 2)])
+    predicted = W[0] + sum([X[i-1] * W[i] for i in range(1, ATTRS)])
+    base = (Y - predicted) ** 2
 
-    base = (Y-predicted)**2
     #     norm = GAMMA / Integer(2) * sum([x ** 2 for x in W])
 
-    return base  #+ norm
+    return base # + norm
 
 def errorProp(X, Y, W):
-    predicted = W[0] + sum([X[:,i-1] * W[i] for i in range(1, 2)])
+    predicted = W[0] + sum([X[:,i-1] * W[i] for i in range(1, ATTRS)])
+    base = (Y - predicted) ** 2
 
-    base = (Y-predicted)**2
     #     norm = GAMMA / Integer(2) * sum([x ** 2 for x in W])
 
-    return np.sum(base)/len(X)
+    return np.sum(base)/len(X) # + norm
+
 
 weights = np.random.normal(size=ATTRS)
 
@@ -76,7 +77,7 @@ f = error(X, Y, W)
 
 gradient_eq = derive_by_array(f, W)
 hessian_eq = derive_by_array(derive_by_array(f, W), W)
-    
+
 gradient_general = lambdify(W + X + [Y], gradient_eq, "numpy")
 hessian_general = lambdify(W + X + [Y], hessian_eq, "numpy")
 
@@ -88,22 +89,28 @@ for _ in range(1000000):
         # Ensure all nodes are at this phase
         send(py_socket, '[]', 'ACK')
         recv(py_socket, 'ACK')
+        print('ACKs received')
 
         # Get weights of all nodes
         send(py_socket, json.dumps(weights.tolist()), 'WEIGHTS')
         receieved_weights = np.array(recv(py_socket, 'WEIGHTS'))
 
+        print(weights)
         total = weights
         total += np.sum(receieved_weights, axis=0)
         weights = total / (len(receieved_weights) + 1)
+        print(weights)
         print('UPDATED')
 
-        loss = errorProp(testX, testY, weights)
-        print("Loss: ", loss)
+
         # Get loss of all nodes
+        loss = errorProp(testX, testY, weights)
+        print(loss)
         send(py_socket, str(loss), 'LOSS')  # TODO: replace get_loss with real loss function
-        received_loss = recv(py_socket, 'LOSS')
+        received_loss = recv(py_socket, 'LOSS')  # TODO: replace get_loss with real loss function
         max_diff = np.ptp(received_loss)
+        print(received_loss)
+        print(max_diff)
 
         if max_diff < MIN_THRESHOLD:
             break
@@ -113,21 +120,21 @@ for _ in range(1000000):
 
     final_grad = (np.zeros((ATTRS)))
     final_hess = (np.zeros((ATTRS, ATTRS)))
-    
+
     grad = lambda *X, Y: gradient_general(*weights, *X, Y)
     hess = lambda *X, Y: hessian_general(*weights, *X, Y)
 
     for i, j in zip(x, y):
         final_grad += grad(*i, Y=j)
         final_hess += hess(*i, Y=j)
-        
+
     final_grad /= S
     final_hess /= S
-    
+
     update = np.matmul(np.linalg.inv(final_hess), final_grad)
-    
+
     alpha = ALPHA  # TODO: use formula
-    
+
     weights -= alpha * update
 
     if (_ + 1) % 100 == 0:
@@ -136,3 +143,8 @@ for _ in range(1000000):
 
 print("Final Weigths: ", weights)
 
+if add_to_blockchain:
+    print('Adding to blockchain')
+    # TODO: add weights to blockchain
+else:
+    print('Weight difference too large, stopping')

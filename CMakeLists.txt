@@ -4,7 +4,7 @@ project(P2P)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libstdc++ -static-libgcc")
 
-link_directories("/usr/local/lib")
+link_directories("/usr/bin/g++")
 
 add_executable(P2PServer server/servermain.cpp common/connection.h common/constants.h server/server.cpp server/server.h common/network_headers.h common/connection.cpp )
 
