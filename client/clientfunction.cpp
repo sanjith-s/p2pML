@@ -32,7 +32,7 @@ void Client::operate() {
         //        std::cout << len << "\n";
 
         for (auto i: connections) {
-            std::cout << "SEND " << type << " " << message << std::endl;
+//            std::cout << "SEND " << type << " " << message << std::endl;
 
             send(i, reinterpret_cast<const char *>(&type), sizeof(len), 0);
             send(i, reinterpret_cast<const char *>(&len), sizeof(len), 0);
@@ -58,13 +58,12 @@ void Client::operate() {
 
                     while (recv(socket, reinterpret_cast<char *>(&len), sizeof(len), 0) == -1);
 
-                    for (auto j: peers) std::cout << connections.size() << "\n";
                     char buffer[len];
                     std::memset(buffer, 0, len);
                     while (recv(socket, buffer, len, 0) == -1);
 
                     std::string output{buffer};
-                    std::cout << "RECV " << output << std::endl;
+//                    std::cout << "RECV " << output << std::endl;
                     sendIPC(py_socket, output);
 
                     done[i] = true;
