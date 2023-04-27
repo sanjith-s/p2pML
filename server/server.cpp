@@ -3,6 +3,7 @@
 #include "server.h"
 #include <stdexcept>
 #include <algorithm>
+#include <iostream>
 
 void Server::initialize_socket(int domain, int service, int protocol) {
     sockfd = socket(domain, service, protocol);
@@ -29,10 +30,12 @@ bool Server::add_if_new(std::string &new_client, int new_port, SOCKET connection
         for (auto i : connections) {
             int adding = 1;
             const char *client = new_client.c_str();
+            std::cout << client << " ";
             send(i, reinterpret_cast<const char *>(&adding), sizeof(bool), 0);
             send(i, client, constants::ip_size, 0);
             send(i, reinterpret_cast<const char *>(&new_port), sizeof(int), 0);
         }
+        std::cout << std::endl;
 
         connections.push_back(connection);
         clients.push_back(std::move(new_client));
