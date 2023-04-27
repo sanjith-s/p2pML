@@ -110,7 +110,6 @@ for _ in range(1000000):
         print(weights)
         print('UPDATED')
 
-
         # Get loss of all nodes
         loss = errorProp(testX, testY, weights)
         print(loss)
