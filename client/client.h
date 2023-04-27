@@ -63,7 +63,7 @@ public:
     }
 
     ~Client() {
-        std::cout << "deleted\n";
+        std::cout << "Deleted\n";
         for (auto i : connections) closesocket(i);
         py_socket.close();
     }

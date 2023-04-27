@@ -13,6 +13,8 @@ void accept_clients(Server &server) {
 
     std::string self_ip{};
 
+    std::cout << "Server started" << '\n';
+
     while (true) {
         SOCKET client{accept(server.get_socket(), address, &addrlen)};
         Connection::make_nonblocking(client);

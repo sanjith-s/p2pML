@@ -14,26 +14,31 @@ from pyIPC import send, recv, connectCPP
 
 # DATASET = 'Datasets/func1.csv'
 DATASET = 'node2_train.csv'  # 3x + 6
+TEST_DATASET = 'node2_test.csv'
+# DATASET = '/home/mona/Desktop/Datasets/cosdataset_train.csv'
+# TEST_DATASET = '/home/mona/Desktop/Datasets/cosdataset_test.csv'
 
 # FUNCTIONS = [lambda x: 1, lambda x: sp.cos(x), lambda x: 1/(x ** 2 + 1), lambda x: x**4]
 
 ALPHA = 0.005
-GAMMA = 0.01
+# GAMMA = 0.01
 
 MIN_THRESHOLD = 0.25
 MAX_THRESHOLD = 0.5
 
 df = pd.read_csv(DATASET)
 
-
 S = len(df)
-
 
 x = df.iloc[:, :-1].values.reshape((S, 1))
 y = df.iloc[:,-1].values
 
-dfTest = pd.read_csv('node2_test.csv')
-testX = dfTest.iloc[:, :-1].values.reshape((S, 1))
+
+dfTest = pd.read_csv(TEST_DATASET)
+
+S_test = len(dfTest)
+
+testX = dfTest.iloc[:, :-1].values.reshape((S_test, 1))
 testY = dfTest.iloc[:, -1].values
 
 ATTRS = 1 + 1
@@ -49,6 +54,7 @@ def error(X, Y, W):
     #     norm = GAMMA / Integer(2) * sum([x ** 2 for x in W])
 
     return base # + norm
+
 
 def errorProp(X, Y, W):
     predicted = W[0] + sum([X[:,i-1] * W[i] for i in range(1, ATTRS)])
@@ -93,7 +99,9 @@ for _ in range(1000000):
 
         # Get weights of all nodes
         send(py_socket, json.dumps(weights.tolist()), 'WEIGHTS')
-        receieved_weights = np.array(recv(py_socket, 'WEIGHTS'))
+        receieved_weights_all = np.array(recv(py_socket, 'WEIGHTS'))
+        receieved_weights_ip = receieved_weights_all[:, 0]
+        receieved_weights = receieved_weights_all[:, 1]
 
         print(weights)
         total = weights
@@ -106,8 +114,10 @@ for _ in range(1000000):
         # Get loss of all nodes
         loss = errorProp(testX, testY, weights)
         print(loss)
-        send(py_socket, str(loss), 'LOSS')  # TODO: replace get_loss with real loss function
-        received_loss = recv(py_socket, 'LOSS')  # TODO: replace get_loss with real loss function
+        send(py_socket, str(loss), 'LOSS')
+        received_loss_all = recv(py_socket, 'LOSS')
+        received_loss_ip = received_loss_all[:, 0] + ["127.0.0.1"]
+        received_loss = received_loss_all[:, 1] + [loss]
         max_diff = np.ptp(received_loss)
         print(received_loss)
         print(max_diff)
@@ -147,4 +157,4 @@ if add_to_blockchain:
     print('Adding to blockchain')
     # TODO: add weights to blockchain
 else:
-    print('Weight difference too large, stopping')
+    print('Loss difference too large, stopping')

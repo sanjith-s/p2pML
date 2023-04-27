@@ -1,7 +1,0 @@
-syntax = "proto2";
-
-package ipc;
-
-message Values {
-  repeated float param = 1;
-}
