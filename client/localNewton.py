@@ -90,6 +90,7 @@ hessian_general = lambdify(W + X + [Y], hessian_eq, "numpy")
 py_socket = connectCPP()
 
 add_to_blockchain = True
+ignore_list = []
 for _ in range(1000000):
     if (_ + 1) % 1000 == 0:
         # Ensure all nodes are at this phase
@@ -103,10 +104,9 @@ for _ in range(1000000):
         receieved_weights_ip = []
         receieved_weights = []
         for ip, weights in receieved_weights_all:
-            # receieved_weights_all[:, 0]
-            receieved_weights_ip += [ip]
-            receieved_weights += [weights]
-        # receieved_weights = np.array(receieved_weights_all[:, 1])
+            if ip not in ignore_list:
+                receieved_weights_ip += [ip]
+                receieved_weights += [weights]
 
         print(weights)
         total = weights
@@ -123,11 +123,13 @@ for _ in range(1000000):
         received_loss_ip = []
         received_loss = []
         for ip, loss in received_loss_all:
-            # receieved_weights_all[:, 0]
-            received_loss_ip += [ip]
-            received_loss += [loss]
-        # received_loss_ip = received_loss_all[:, 0] + ["127.0.0.1"]
-        # received_loss = received_loss_all[:, 1] + [loss]
+            if ip not in ignore_list:
+                received_loss_ip += [ip]
+                received_loss += [loss]
+
+        received_loss_ip += ["127.0.0.1"]
+        received_loss += [loss]
+
         max_diff = np.ptp(received_loss)
         print(received_loss)
         print(max_diff)
