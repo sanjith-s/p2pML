@@ -13,8 +13,8 @@ from pyIPC import send, recv, connectCPP
 
 
 # DATASET = 'Datasets/func1.csv'
-# DATASET = 'node2_train.csv'  # 3x + 6
-# TEST_DATASET = 'node2_test.csv'
+# DATASET = 'node1_train.csv'  # 3x + 6
+# TEST_DATASET = 'node1_test.csv'
 DATASET = '/home/mona/Desktop/Datasets/cosdataset_train.csv'
 TEST_DATASET = '/home/mona/Desktop/Datasets/cosdataset_test.csv'
 
@@ -99,7 +99,9 @@ for _ in range(1000000):
 
         # Get weights of all nodes
         send(py_socket, json.dumps(weights.tolist()), 'WEIGHTS')
-        receieved_weights = np.array(recv(py_socket, 'WEIGHTS'))
+        receieved_weights_all = np.array(recv(py_socket, 'WEIGHTS'))
+        receieved_weights_ip = receieved_weights_all[:, 0]
+        receieved_weights = receieved_weights_all[:, 1]
 
         print(weights)
         total = weights
@@ -113,7 +115,9 @@ for _ in range(1000000):
         loss = errorProp(testX, testY, weights)
         print(loss)
         send(py_socket, str(loss), 'LOSS')
-        received_loss = recv(py_socket, 'LOSS') + [loss]
+        received_loss_all = recv(py_socket, 'LOSS')
+        received_loss_ip = receieved_weights_all[:, 0] + ["127.0.0.1"]
+        received_loss = receieved_weights_all[:, 1] + [loss]
         max_diff = np.ptp(received_loss)
         print(received_loss)
         print(max_diff)
