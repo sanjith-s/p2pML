@@ -154,13 +154,13 @@ def mixmerkletree() -> None:
     # mtree.printTree()
 
 
-myChain = Blockchain()
+# myChain = Blockchain()
 
-myChain.addBlock("hello")
-myChain.addBlock("this is me")
-myChain.addBlock("hello world")
-
-myChain.displayChain()
+# myChain.addBlock("hello")
+# myChain.addBlock("this is me")
+# myChain.addBlock("hello world")
+#
+# myChain.displayChain()
 # mixmerkletree()
 # hashList = []
 # hashList.append(myChain.generateListOfHashes())

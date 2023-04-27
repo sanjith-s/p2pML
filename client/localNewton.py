@@ -2,13 +2,13 @@ import json
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import sympy as sp
 from sympy import Rational, Integer, Array, lambdify
 from sympy.tensor.array import derive_by_array
-from sympy.vector import CoordSys3D, Del
+# from sympy.vector import CoordSys3D, Del
 
-
+from client.blockchain import Blockchain
 from pyIPC import send, recv, connectCPP
 
 
@@ -165,8 +165,11 @@ for _ in range(1000000):
 
 print("Final Weigths: ", weights)
 
+myChain = Blockchain()
+
 if add_to_blockchain:
     print('Adding to blockchain')
+    myChain.addBlock(weights)
     # TODO: add weights to blockchain
 else:
     print('Loss difference too large, stopping')
