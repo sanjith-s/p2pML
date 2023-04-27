@@ -63,7 +63,7 @@ void Client::operate() {
                     while (recv(socket, buffer, len, 0) == -1);
 
                     std::string output{buffer};
-                    output = '[' + peers[i] + ',' + output + ']';
+                    output = "[\"" + peers[i] + "\", " + output + "]";
 //                    std::cout << "RECV " << output << std::endl;
                     sendIPC(py_socket, output);
 
