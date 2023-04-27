@@ -99,9 +99,9 @@ for _ in range(1000000):
 
         # Get weights of all nodes
         send(py_socket, json.dumps(weights.tolist()), 'WEIGHTS')
-        receieved_weights_all = np.array(recv(py_socket, 'WEIGHTS'))
+        receieved_weights_all = recv(py_socket, 'WEIGHTS')
         receieved_weights_ip = receieved_weights_all[:, 0]
-        receieved_weights = receieved_weights_all[:, 1]
+        receieved_weights = np.array(receieved_weights_all[:, 1])
 
         print(weights)
         total = weights
