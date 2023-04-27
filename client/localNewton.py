@@ -100,8 +100,13 @@ for _ in range(1000000):
         # Get weights of all nodes
         send(py_socket, json.dumps(weights.tolist()), 'WEIGHTS')
         receieved_weights_all = recv(py_socket, 'WEIGHTS')
-        receieved_weights_ip = receieved_weights_all[:, 0]
-        receieved_weights = np.array(receieved_weights_all[:, 1])
+        receieved_weights_ip = []
+        receieved_weights = []
+        for ip, weights in receieved_weights_all:
+            # receieved_weights_all[:, 0]
+            receieved_weights_ip += [ip]
+            receieved_weights += [weights]
+        # receieved_weights = np.array(receieved_weights_all[:, 1])
 
         print(weights)
         total = weights
@@ -115,8 +120,14 @@ for _ in range(1000000):
         print(loss)
         send(py_socket, str(loss), 'LOSS')
         received_loss_all = recv(py_socket, 'LOSS')
-        received_loss_ip = received_loss_all[:, 0] + ["127.0.0.1"]
-        received_loss = received_loss_all[:, 1] + [loss]
+        received_loss_ip = []
+        received_loss = []
+        for ip, loss in received_loss_all:
+            # receieved_weights_all[:, 0]
+            received_loss_ip += [ip]
+            received_loss += [loss]
+        # received_loss_ip = received_loss_all[:, 0] + ["127.0.0.1"]
+        # received_loss = received_loss_all[:, 1] + [loss]
         max_diff = np.ptp(received_loss)
         print(received_loss)
         print(max_diff)
