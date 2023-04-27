@@ -13,10 +13,10 @@ from pyIPC import send, recv, connectCPP
 
 
 # DATASET = 'Datasets/func1.csv'
-# DATASET = 'node1_train.csv'  # 3x + 6
-# TEST_DATASET = 'node1_test.csv'
-DATASET = '/home/mona/Desktop/Datasets/cosdataset_train.csv'
-TEST_DATASET = '/home/mona/Desktop/Datasets/cosdataset_test.csv'
+DATASET = 'node2_train.csv'  # 3x + 6
+TEST_DATASET = 'node2_test.csv'
+# DATASET = '/home/mona/Desktop/Datasets/cosdataset_train.csv'
+# TEST_DATASET = '/home/mona/Desktop/Datasets/cosdataset_test.csv'
 
 # FUNCTIONS = [lambda x: 1, lambda x: sp.cos(x), lambda x: 1/(x ** 2 + 1), lambda x: x**4]
 
@@ -115,8 +115,8 @@ for _ in range(1000000):
         print(loss)
         send(py_socket, str(loss), 'LOSS')
         received_loss_all = recv(py_socket, 'LOSS')
-        received_loss_ip = receieved_weights_all[:, 0] + ["127.0.0.1"]
-        received_loss = receieved_weights_all[:, 1] + [loss]
+        received_loss_ip = received_loss_all[:, 0] + ["127.0.0.1"]
+        received_loss = received_loss_all[:, 1] + [loss]
         max_diff = np.ptp(received_loss)
         print(received_loss)
         print(max_diff)
