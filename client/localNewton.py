@@ -55,6 +55,9 @@ def find_outliers(points, k):
     mean = np.mean(points)
     std_dev = np.std(points)
 
+    if std_dev == 0:
+        return []
+
     z_scores = [(point - mean) / std_dev for point in points]
 
     outliers = [i for i, z in enumerate(z_scores) if abs(z) > k]
@@ -178,12 +181,12 @@ def local_newton(weights, whitelist=None):
 print("Final Weigths: ", weights)
 
 
-weights = local_newton(weights, None)
+weights = local_newton(weights, ['10.5.1.148'])
 
 send(py_socket, '[]', 'CLUSTER_ACK')
 recv(py_socket, 'CLUSTER_ACK')
 
-is_leader = False
+is_leader = True
 
 loss = errorProp(testX, testY, weights)
 send(py_socket, str(loss) if is_leader else -1, 'LOSS')
