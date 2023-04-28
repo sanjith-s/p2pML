@@ -32,9 +32,11 @@ void Client::operate() {
         bool *done = new bool[length]{false};
 
         if (type == Client::CLUSTER_ACK) {
-            std::pair<int, Client::output_type> clack = cluster_acks.back();
-            done[clack.first] = true;
-            sendIPC(py_socket, clack.second);
+            while (cluster_acks.empty()) {
+                std::pair<int, Client::output_type> clack = cluster_acks.back();
+                done[clack.first] = true;
+                sendIPC(py_socket, clack.second);
+            }
         }
 
         bool flag{true};
