@@ -8,6 +8,8 @@ from sympy import Rational, Integer, Array, lambdify
 from sympy.tensor.array import derive_by_array
 from sympy.vector import CoordSys3D, Del
 
+from blockchain import Blockchain
+
 
 from pyIPC import send, recv, connectCPP
 
@@ -178,6 +180,9 @@ print("Final Weigths: ", weights)
 
 weights = local_newton(weights, None)
 
+send(py_socket, '[]', 'CLUSTER_ACK')
+recv(py_socket, 'CLUSTER_ACK')
+
 is_leader = False
 
 loss = errorProp(testX, testY, weights)
@@ -201,5 +206,10 @@ if is_leader:
 
 local_newton(weights, ips)
 
-print('Adding to blockchain')
-# TODO: add weights to blockchain
+send(py_socket, '[]', 'CLUSTER_ACK')
+recv(py_socket, 'CLUSTER_ACK')
+
+if is_leader:
+    blockchain = Blockchain()
+    blockchain.addBlock(weights)
+    print('Adding to blockchain')

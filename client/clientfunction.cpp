@@ -9,19 +9,6 @@
 #include <vector>
 #include "pyIPC.h"
 
-std::pair<int, Client::output_type> Client::get_output() {
-    std::string params{};
-
-    int type;
-    while (params.length() == 0) {
-//        std::getline(std::cin >> std::ws, params);
-//        params = contactIPC(py_socket, *this, type);
-//        std::cout << params;
-    }
-
-    return std::make_pair(type, params);
-}
-
 void Client::operate() {
     std::string message{};
     MessageType type{};
@@ -44,9 +31,23 @@ void Client::operate() {
         std::size_t length{connections.size()};
         bool *done = new bool[length]{false};
 
-        bool flag{false};
+        if (type == Client::CLUSTER_ACK) {
+            std::pair<int, Client::output_type> clack = cluster_acks.back();
+            done[clack.first] = true;
+            sendIPC(py_socket, clack.second);
+        }
+
+        bool flag{true};
+        for (std::size_t i = 0; i < length; i++) flag &= done[i];
+
         while (!flag) {
             for (std::size_t i = 0; i < length; i++) {
+                for (const auto& clack : cluster_acks) {
+                    if (i == clack.first) {
+                        sendIPC(py_socket, "[\"" + peers[i] + "\", 0]");
+                    }
+                }
+
                 if (done[i]) continue;
 
                 SOCKET socket = connections[i];
@@ -54,8 +55,6 @@ void Client::operate() {
                 int len{};
                 //            int status = recv(socket, reinterpret_cast<char *>(&recv_type), sizeof(len), 0);
                 if (recv(socket, reinterpret_cast<char *>(&recv_type), sizeof(recv_type), 0) != -1) {
-                    if (recv_type != type) std::exit(1);
-
                     while (recv(socket, reinterpret_cast<char *>(&len), sizeof(len), 0) == -1);
 
                     char buffer[len];
@@ -64,6 +63,15 @@ void Client::operate() {
 
                     std::string output{buffer};
                     output = "[\"" + peers[i] + "\", " + output + "]";
+
+                    if (recv_type != type) {
+                        if (recv_type == Client::CLUSTER_ACK) {
+                            cluster_acks.emplace_back(i, output);
+                            continue;
+                        } else {
+                            std::exit(1);
+                        }
+                    }
 
 //                    std::cout << "RECV " << output << std::endl;
                     sendIPC(py_socket, output);

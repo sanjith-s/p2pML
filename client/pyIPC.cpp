@@ -22,6 +22,7 @@ Client::MessageDirection contactIPC(zmqpp::socket &socket, const Client &client,
     if (message == "WEIGHTS") type = Client::WEIGHTS;
     else if (message == "LOSS") type = Client::LOSS;
     else if (message == "ACK") type = Client::ACK;
+    else if (message == "CLUSTER_ACK") type = Client::CLUSTER_ACK;
     else return Client::ERROR;
 
     if (direction == Client::SEND) socket.receive(message);

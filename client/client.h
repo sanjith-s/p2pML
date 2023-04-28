@@ -27,6 +27,7 @@ public:
         WEIGHTS = 0,
         LOSS = 1,
         ACK = 2,
+        CLUSTER_ACK = 3
     };
 
 private:
@@ -41,8 +42,8 @@ private:
     zmqpp::context context{};
     zmqpp::socket py_socket;
 
+    std::vector<std::pair<int, output_type>> cluster_acks{};
     void initialize_socket(int domain, int service, int protocol);
-    std::pair<int, output_type> get_output();
 
 public:
     std::vector<std::string> peers{};
