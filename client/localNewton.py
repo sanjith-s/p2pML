@@ -148,6 +148,7 @@ def local_newton(weights, whitelist=None):
                     received_loss += [loss]
 
             outliers = find_outliers(received_loss, K)
+            print(outliers)
 
             if len(outliers) == 0:
                 return weights
@@ -180,8 +181,10 @@ def local_newton(weights, whitelist=None):
 
 print("Final Weigths: ", weights)
 
+CLUSTER_IPS = ['10.5.1.148']
 
-weights = local_newton(weights, ['10.5.1.148'])
+weights = local_newton(weights, CLUSTER_IPS)
+print(weights)
 
 send(py_socket, '[]', 'CLUSTER_ACK')
 print(recv(py_socket, 'CLUSTER_ACK'))
@@ -215,5 +218,5 @@ recv(py_socket, 'CLUSTER_ACK')
 
 if is_leader:
     blockchain = Blockchain()
-    blockchain.addBlock(weights)
+    blockchain.addBlock(str(weights))
     print('Adding to blockchain')

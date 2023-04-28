@@ -67,12 +67,9 @@ void Client::operate() {
                     output = "[\"" + peers[i] + "\", " + output + "]";
 
                     if (recv_type != type) {
-                        if (recv_type == Client::CLUSTER_ACK) {
+                        if (recv_type == Client::CLUSTER_ACK)
                             cluster_acks.emplace_back(i, output);
-                            continue;
-                        } else {
-                            std::exit(1);
-                        }
+                        continue;
                     }
 
 //                    std::cout << "RECV " << output << std::endl;
