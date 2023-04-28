@@ -109,7 +109,7 @@ hessian_general = lambdify(W + X + [Y], hessian_eq, "numpy")
 
 def local_newton(weights, whitelist=None):
     if whitelist is None:
-        ignore_list = []
+        whitelist = []
 
     for _ in range(1000000):
         if (_ + 1) % 1000 == 0:
@@ -184,7 +184,7 @@ print("Final Weigths: ", weights)
 weights = local_newton(weights, ['10.5.1.148'])
 
 send(py_socket, '[]', 'CLUSTER_ACK')
-recv(py_socket, 'CLUSTER_ACK')
+print(recv(py_socket, 'CLUSTER_ACK'))
 
 is_leader = True
 
@@ -194,6 +194,7 @@ send(py_socket, str(loss) if is_leader else -1, 'LOSS')
 ips = None
 if is_leader:
     received_loss_all = recv(py_socket, 'LOSS')
+    print(received_loss_all)
 
     ips = ['127.0.0.1']
     total_loss = [loss]
