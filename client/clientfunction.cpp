@@ -76,7 +76,8 @@ void Client::operate() {
                             sendIPC(py_socket, "[\"" + peers[i] + "\", 0]");
                             done[i] = true;
                         } else if (type != Client::CLUSTER_ACK) {
-                            std::cout << "Incorrect type received" << std::endl;
+                            std::cout << "Incorrect type received: expected " << type
+                            << " got " << recv_type << std::endl;
                         }
 
                         continue;
