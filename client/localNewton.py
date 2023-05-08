@@ -28,7 +28,7 @@ ALPHA = 0.005
 MIN_THRESHOLD = 0.25
 MAX_THRESHOLD = 0.5
 
-K = 2.5
+K = 1
 
 df = pd.read_csv(DATASET)
 
@@ -62,6 +62,7 @@ def find_outliers(points, k):
 
     outliers = [i for i, z in enumerate(z_scores) if abs(z) > k]
 
+    print('Z', z_scores)
     return outliers
 
 
