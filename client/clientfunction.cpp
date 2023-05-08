@@ -29,11 +29,14 @@ void Client::operate() {
 //            future = std::async(&Client::get_output, this);
     } else if (command == Client::GET) {
         std::size_t length{connections.size()};
+        if (length <= 0) return;
+
         bool *done = new bool[length]{false};
 
         if (type == Client::CLUSTER_ACK) {
             while (!cluster_acks.empty()) {
                 std::pair<int, Client::output_type> clack = cluster_acks.back();
+                cluster_acks.pop_back();
                 done[clack.first] = true;
                 sendIPC(py_socket, clack.second);
             }
@@ -63,12 +66,16 @@ void Client::operate() {
                     std::memset(buffer, 0, len);
                     while (recv(socket, buffer, len, 0) == -1);
 
-                    std::string output{buffer};
-                    output = "[\"" + peers[i] + "\", " + output + "]";
+                    std::string output{"[\"" + peers[i] + "\", " + buffer + "]"};
 
                     if (recv_type != type) {
-                        if (recv_type == Client::CLUSTER_ACK)
+                        if (recv_type == Client::CLUSTER_ACK) {
                             cluster_acks.emplace_back(i, output);
+                            done[i] = true;
+                        } else {
+                            std::cout << "Incorrect type received" << std::endl;
+                        }
+
                         continue;
                     }
 

@@ -107,10 +107,16 @@ gradient_general = lambdify(W + X + [Y], gradient_eq, "numpy")
 hessian_general = lambdify(W + X + [Y], hessian_eq, "numpy")
 
 
+right, wrong = 0, 0
+
+
 def local_newton(weights, whitelist=None):
+    global right, wrong
+
     if whitelist is None:
         whitelist = []
 
+    is_outlier = False
     for _ in range(1000000):
         if (_ + 1) % 1000 == 0:
             # Ensure all nodes are at this phase
@@ -151,9 +157,17 @@ def local_newton(weights, whitelist=None):
             print(outliers)
 
             if len(outliers) == 0:
+                if is_outlier:
+                    wrong += 1
+                else:
+                    right += 1
+
                 return weights
             else:
                 for index in sorted(outliers, reverse=True):
+                    if whitelist[index] == LOCALHOST:
+                        is_outlier = True
+
                     del whitelist[index]
 
         final_grad = (np.zeros((ATTRS)))
@@ -177,46 +191,42 @@ def local_newton(weights, whitelist=None):
 
         if (_ + 1) % 100 == 0:
             print('WEIGHTS', weights)
-            # send(py_socket, weights, 'WEIGHTS')
 
-print("Final Weigths: ", weights)
 
-CLUSTER_IPS = ['10.5.1.148']
+if True:
+    cluster_ips = [LOCALHOST]
 
-weights = local_newton(weights, CLUSTER_IPS)
-print(weights)
+    with open('cluster_ips', 'r') as cluster_data:
+        for ip in cluster_data:
+            cluster_ips += [ip[:-1]]
 
-send(py_socket, '[]', 'CLUSTER_ACK')
-print(recv(py_socket, 'CLUSTER_ACK'))
+    weights = local_newton(weights, cluster_ips)
 
-is_leader = True
+    send(py_socket, '[]', 'CLUSTER_ACK')
+    recv(py_socket, 'CLUSTER_ACK')
+
+print(right, wrong)
+
+is_leader = right >= wrong
 
 loss = errorProp(testX, testY, weights)
 send(py_socket, str(loss) if is_leader else -1, 'LOSS')
-
-ips = None
+ips = ['127.0.0.1']
 if is_leader:
     received_loss_all = recv(py_socket, 'LOSS')
-    print(received_loss_all)
-
-    ips = ['127.0.0.1']
-    total_loss = [loss]
 
     for ip, loss in received_loss_all:
         if loss != -1:
             ips += [ip]
-            total_loss += [loss]
 
-    outliers = find_outliers(total_loss, K)
-    for index in sorted(outliers, reverse=True):
-        del ips[index]
-
-local_newton(weights, ips)
+    local_newton(weights, ips)
 
 send(py_socket, '[]', 'CLUSTER_ACK')
 recv(py_socket, 'CLUSTER_ACK')
 
 if is_leader:
+    print("Final Weigths: ", weights)
+
     blockchain = Blockchain()
     blockchain.addBlock(str(weights))
     print('Adding to blockchain')
