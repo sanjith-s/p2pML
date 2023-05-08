@@ -47,13 +47,15 @@ void Client::operate() {
 
         while (!flag) {
             for (std::size_t i = 0; i < length; i++) {
+                if (done[i]) continue;
+
                 for (const auto& clack : cluster_acks) {
                     if (i == clack.first) {
                         sendIPC(py_socket, "[\"" + peers[i] + "\", 0]");
+                        done[i] = true;
+                        continue;
                     }
                 }
-
-                if (done[i]) continue;
 
                 SOCKET socket = connections[i];
                 Client::MessageType recv_type{};
@@ -71,8 +73,9 @@ void Client::operate() {
                     if (recv_type != type) {
                         if (recv_type == Client::CLUSTER_ACK) {
                             cluster_acks.emplace_back(i, output);
+                            sendIPC(py_socket, "[\"" + peers[i] + "\", 0]");
                             done[i] = true;
-                        } else {
+                        } else if (type != Client::CLUSTER_ACK) {
                             std::cout << "Incorrect type received" << std::endl;
                         }
 
