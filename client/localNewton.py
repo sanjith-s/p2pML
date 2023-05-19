@@ -27,7 +27,7 @@ ALPHA = 0.005
 MIN_THRESHOLD = 0.25
 MAX_THRESHOLD = 0.5
 
-K = 1
+K = 1.2
 
 df = pd.read_csv(DATASET)
 
@@ -51,6 +51,8 @@ S = len(df)
 
 
 def find_outliers(points, k):
+    print(points)
+
     mean = np.mean(points)
     std_dev = np.std(points)
 
@@ -144,6 +146,8 @@ def local_newton(weights, whitelist=None):
     is_outlier = False
     for _ in range(1000000):
         if (_ + 1) % 1000 == 0:
+            print('WHITELIST', whitelist)
+
             # Ensure all nodes are at this phase
             send(py_socket, '[]', 'ACK')
             recv(py_socket, 'ACK')
