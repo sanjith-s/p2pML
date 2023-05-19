@@ -272,7 +272,7 @@ if is_leader:
         if loss != -1:
             ips += [ip]
 
-    local_newton(weights, ips)
+    local_newton(weights, ips.copy())
 
 send(py_socket, '[]', 'CLUSTER_ACK')
 recv(py_socket, 'CLUSTER_ACK')
