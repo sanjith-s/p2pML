@@ -189,8 +189,8 @@ def local_newton(weights, whitelist=None):
             print(loss)
             send(py_socket, str(loss), 'LOSS')
             received_loss_all = recv(py_socket, 'LOSS')
-            received_loss_ip = ['127.0.0.1'] if LOCALHOST in whitelist else []
-            received_loss = [loss] if LOCALHOST in whitelist else []
+            received_loss_ip = []
+            received_loss = []
 
             for allowed in whitelist:
                 if allowed == LOCALHOST:
