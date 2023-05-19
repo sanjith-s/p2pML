@@ -111,30 +111,38 @@ hessian_general = lambdify(W + X + [Y], hessian_eq, "numpy")
 
 right, wrong = 0, 0
 
+cluster1 = []
+cluster2 = []
 
-def swap_rows(file1_path, file2_path, k):
-    with open(file1_path, 'r') as file1:
-        lines1 = file1.readlines()
-
-    with open(file2_path, 'r') as file2:
-        lines2 = file2.readlines()
-
-    rows1 = lines1[len(lines1) - 1 - k].strip().split('.')
-    rows2 = lines2[len(lines2) - 1 - k].strip().split('.')
-    lines1[len(lines1) - 1 - k] = '.'.join(rows2) + '\n'
-    lines2[len(lines2) - 1 - k] = '.'.join(rows1) + '\n'
-
-    with open(file1_path, 'w') as file1:
-        file1.writelines(lines1)
-
-    with open(file2_path, 'w') as file2:
-        file2.writelines(lines2)
-    print("DONE!!!!")
-
-
-# Usage example
 file1_path = 'cluster_ips_a'
 file2_path = 'cluster_ips_b'
+
+
+with open(file1_path, 'r') as cluster1_data:
+    for ip in cluster1_data:
+        cluster1 += [ip[:-1]]
+
+with open(file2_path, 'r') as cluster2_data:
+    for ip in cluster2_data:
+        cluster2 += [ip[:-1]]
+
+
+def swap_rows(cluster_a, cluster_b, k):
+
+    temp = cluster_a[len(cluster_a) - 1 - k]
+    cluster_a[len(cluster_a) - 1 - k] = cluster_b[len(cluster_b) - 1 - k]
+    cluster_b[len(cluster_b) - 1 - k] = temp
+    # rows1 = lines1[len(lines1) - 1 - k].strip().split('.')
+    # rows2 = lines2[len(lines2) - 1 - k].strip().split('.')
+    # lines1[len(lines1) - 1 - k] = '.'.join(rows2) + '\n'
+    # lines2[len(lines2) - 1 - k] = '.'.join(rows1) + '\n'
+
+    # with open(file1_path, 'w') as file1:
+    #     file1.writelines(lines1)
+    #
+    # with open(file2_path, 'w') as file2:
+    #     file2.writelines(lines2)
+    print("DONE!!!!")
 
 
 def local_newton(weights, whitelist=None):
@@ -222,27 +230,10 @@ def local_newton(weights, whitelist=None):
             print('WEIGHTS', weights)
 
 
-nodes = 0
-
-with open(file1_path, 'r') as file1:
-    nodes += len(file1.readlines())
-
-with open(file2_path, 'r') as file2:
-    nodes += len(file2.readlines())
+nodes = len(cluster1) + len(cluster2)
 
 for i in range(nodes // 2):
-    cluster_ips = []
-
-    with open(file1_path, 'r') as cluster1_data:
-        for ip in cluster1_data:
-            cluster_ips += [ip[:-1]]
-
-    if LOCALHOST not in cluster_ips:
-        cluster_ips = []
-
-        with open(file2_path, 'r') as cluster2_data:
-            for ip in cluster2_data:
-                cluster_ips += [ip[:-1]]
+    cluster_ips = cluster1 if LOCALHOST in cluster1 else cluster2
 
     print(cluster_ips)
     weights = local_newton(weights, cluster_ips)
@@ -250,7 +241,7 @@ for i in range(nodes // 2):
     send(py_socket, '[]', 'CLUSTER_ACK')
     recv(py_socket, 'CLUSTER_ACK')
 
-    swap_rows(file1_path, file2_path, i)
+    swap_rows(cluster1, cluster2, i)
 
 print(right, wrong)
 
