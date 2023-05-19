@@ -10,7 +10,6 @@ from sympy.vector import CoordSys3D, Del
 
 from blockchain import Blockchain
 
-
 from pyIPC import send, recv, connectCPP
 
 LOCALHOST = '127.0.0.1'
@@ -111,6 +110,31 @@ hessian_general = lambdify(W + X + [Y], hessian_eq, "numpy")
 right, wrong = 0, 0
 
 
+def swap_rows(file1_path, file2_path, k):
+    with open(file1_path, 'r') as file1:
+        lines1 = file1.readlines()
+
+    with open(file2_path, 'r') as file2:
+        lines2 = file2.readlines()
+
+    rows1 = lines1[len(lines1) - 1 - k].strip().split('.')
+    rows2 = lines2[len(lines2) - 1 - k].strip().split('.')
+    lines1[len(lines1) - 1 - k] = '.'.join(rows2) + '\n'
+    lines2[len(lines2) - 1 - k] = '.'.join(rows1) + '\n'
+
+    with open(file1_path, 'w') as file1:
+        file1.writelines(lines1)
+
+    with open(file2_path, 'w') as file2:
+        file2.writelines(lines2)
+    print("DONE!!!!")
+
+
+# Usage example
+file1_path = 'cluster_ips_a'
+file2_path = 'cluster_ips_b'
+
+
 def local_newton(weights, whitelist=None):
     global right, wrong
 
@@ -194,17 +218,35 @@ def local_newton(weights, whitelist=None):
             print('WEIGHTS', weights)
 
 
-if True:
-    cluster_ips = [LOCALHOST]
+nodes = 0
 
-    with open('cluster_ips', 'r') as cluster_data:
-        for ip in cluster_data:
+with open(file1_path, 'r') as file1:
+    nodes += len(file1.readlines())
+
+with open(file2_path, 'r') as file2:
+    nodes += len(file2.readlines())
+
+for i in range(nodes // 2):
+    cluster_ips = []
+
+    with open(file1_path, 'r') as cluster1_data:
+        for ip in cluster1_data:
             cluster_ips += [ip[:-1]]
 
+    if LOCALHOST not in cluster_ips:
+        cluster_ips = []
+
+        with open(file2_path, 'r') as cluster2_data:
+            for ip in cluster2_data:
+                cluster_ips += [ip[:-1]]
+
+    print(cluster_ips)
     weights = local_newton(weights, cluster_ips)
 
     send(py_socket, '[]', 'CLUSTER_ACK')
     recv(py_socket, 'CLUSTER_ACK')
+
+    swap_rows(file1_path, file2_path, i)
 
 print(right, wrong)
 
@@ -213,6 +255,7 @@ is_leader = right >= wrong
 loss = errorProp(testX, testY, weights)
 send(py_socket, str(loss) if is_leader else '-1', 'LOSS')
 ips = ['127.0.0.1']
+# ips = []
 if is_leader:
     received_loss_all = recv(py_socket, 'LOSS')
 
