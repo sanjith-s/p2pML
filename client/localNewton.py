@@ -165,12 +165,19 @@ def local_newton(weights, whitelist=None):
             print(weights)
             send(py_socket, json.dumps(weights.tolist()), 'WEIGHTS')
             receieved_weights_all = recv(py_socket, 'WEIGHTS')
-            receieved_weights_ip = ['127.0.0.1'] if LOCALHOST in whitelist else []
-            receieved_weights = [weights] if LOCALHOST in whitelist else []
-            for ip, weights in receieved_weights_all:
-                if ip in whitelist:
-                    receieved_weights_ip += [ip]
+            receieved_weights_ip = []
+            receieved_weights = []
+            for allowed in whitelist:
+                if allowed == LOCALHOST:
+                    receieved_weights_ip += [LOCALHOST]
                     receieved_weights += [weights]
+                    continue
+
+                for ip, recv_weights in receieved_weights_all:
+                    if ip == allowed:
+                        receieved_weights_ip += [ip]
+                        receieved_weights += [recv_weights]
+                        break
 
             total = np.sum(receieved_weights, axis=0)
             weights = total / (len(receieved_weights) + 1)
@@ -185,10 +192,17 @@ def local_newton(weights, whitelist=None):
             received_loss_ip = ['127.0.0.1'] if LOCALHOST in whitelist else []
             received_loss = [loss] if LOCALHOST in whitelist else []
 
-            for ip, loss in received_loss_all:
-                if ip in whitelist:
-                    received_loss_ip += [ip]
+            for allowed in whitelist:
+                if allowed == LOCALHOST:
+                    received_loss_ip += [LOCALHOST]
                     received_loss += [loss]
+                    continue
+
+                for ip, recv_loss in received_loss_all:
+                    if ip == allowed:
+                        received_loss_ip += [ip]
+                        received_loss += [recv_loss]
+                        break
 
             outliers = find_outliers(received_loss, K)
             print(outliers)
