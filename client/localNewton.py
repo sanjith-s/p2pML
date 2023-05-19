@@ -250,7 +250,7 @@ for i in range(nodes // 2):
     cluster_ips = cluster1 if LOCALHOST in cluster1 else cluster2
 
     print(cluster_ips)
-    weights = local_newton(weights, cluster_ips)
+    weights = local_newton(weights, cluster_ips.copy())
 
     send(py_socket, '[]', 'CLUSTER_ACK')
     recv(py_socket, 'CLUSTER_ACK')
