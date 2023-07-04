@@ -7,6 +7,7 @@ import sympy as sp
 from sympy import Rational, Integer, Array, lambdify
 from sympy.tensor.array import derive_by_array
 from sympy.vector import CoordSys3D, Del
+import itertools
 
 from blockchain import Blockchain
 
@@ -126,6 +127,8 @@ with open(file2_path, 'r') as cluster2_data:
     for ip in cluster2_data:
         cluster2 += [ip[:-1]]
 
+all_nodes = cluster1 + cluster2
+
 
 def swap_rows(cluster_a, cluster_b, k):
 
@@ -244,18 +247,24 @@ def local_newton(weights, whitelist=None):
             print('WEIGHTS', weights)
 
 
-nodes = len(cluster1) + len(cluster2)
+nodes = len(all_nodes)  # len(cluster1) + len(cluster2)
+if nodes % 2 == 0:
+    all_nodes += [-1]
 
-for i in range(nodes // 2):
-    cluster_ips = cluster1 if LOCALHOST in cluster1 else cluster2
+count = 0
+for combination in itertools.combinations(all_nodes, nodes // 2):
+    if -1 in combination:
+        continue
 
-    print(cluster_ips)
+    count += 1
+
+    cluster_ips = list(combination) if LOCALHOST in combination else [ip for ip in all_nodes
+                                                                      if ip not in combination and ip != -1]
+    # print(count, '\t', cluster_ips, tuple(cluster_ips) == combination)
     weights = local_newton(weights, cluster_ips.copy())
 
     send(py_socket, '[]', 'CLUSTER_ACK')
     recv(py_socket, 'CLUSTER_ACK')
-
-    swap_rows(cluster1, cluster2, i)
 
 print(right, wrong)
 
