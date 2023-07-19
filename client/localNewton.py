@@ -13,7 +13,9 @@ from blockchain import Blockchain
 
 from pyIPC import send, recv, connectCPP
 
-LOCALHOST = '127.0.0.1'
+import socket
+
+LOCALHOST = socket.gethostbyname(socket.gethostname())  # '127.0.0.1'
 # DATASET = 'Datasets/func1.csv'
 DATASET = 'node2_train.csv'  # 3x + 6
 TEST_DATASET = 'node2_test.csv'
