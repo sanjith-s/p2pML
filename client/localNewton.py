@@ -274,7 +274,7 @@ is_leader = right >= wrong
 
 loss = errorProp(testX, testY, weights)
 send(py_socket, str(loss) if is_leader else '-1', 'LOSS')
-ips = ['127.0.0.1']
+ips = [LOCALHOST]
 # ips = []
 if is_leader:
     received_loss_all = recv(py_socket, 'LOSS')
