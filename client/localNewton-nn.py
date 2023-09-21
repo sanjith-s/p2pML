@@ -222,7 +222,7 @@ for combination in itertools.combinations(all_nodes, nodes // 2):
     cluster_ips = list(combination) if LOCALHOST in combination else [ip for ip in all_nodes
                                                                       if ip not in combination and ip != -1]
     # print(count, '\t', cluster_ips, tuple(cluster_ips) == combination)
-    weights = local_newton(weights, cluster_ips.copy())
+    weights = local_newton(cluster_ips.copy())
 
     send(py_socket, '[]', 'CLUSTER_ACK')
     recv(py_socket, 'CLUSTER_ACK')
