@@ -184,24 +184,7 @@ def local_newton(whitelist=None):
 
                     del whitelist[index]
 
-        # final_grad = (np.zeros((ATTRS)))
-        # final_hess = (np.zeros((ATTRS, ATTRS)))
-        #
-        # grad = lambda *X, Y: gradient_general(*weights, *X, Y)
-        # hess = lambda *X, Y: hessian_general(*weights, *X, Y)
-        #
-        # for i, j in zip(x, y):
-        #     final_grad += grad(*i, Y=j)
-        #     final_hess += hess(*i, Y=j)
-        #
-        # final_grad /= S
-        # final_hess /= S
-        #
-        # update = np.matmul(np.linalg.inv(final_hess), final_grad)
-        #
-        # alpha = ALPHA  # TODO: use formula
-        #
-        # weights -= alpha * update
+
 
         model.train(trainX, trainY, 1)
 
@@ -222,7 +205,7 @@ for combination in itertools.combinations(all_nodes, nodes // 2):
     cluster_ips = list(combination) if LOCALHOST in combination else [ip for ip in all_nodes
                                                                       if ip not in combination and ip != -1]
     # print(count, '\t', cluster_ips, tuple(cluster_ips) == combination)
-    weights = local_newton(cluster_ips.copy())
+    model.weights = local_newton(cluster_ips.copy())
 
     send(py_socket, '[]', 'CLUSTER_ACK')
     recv(py_socket, 'CLUSTER_ACK')
@@ -242,14 +225,14 @@ if is_leader:
         if loss != -1:
             ips += [ip]
 
-    local_newton(weights, ips.copy())
+    local_newton(ips.copy())
 
 send(py_socket, '[]', 'CLUSTER_ACK')
 recv(py_socket, 'CLUSTER_ACK')
 
 if is_leader:
-    print("Final Weigths: ", weights)
+    print("Final Weigths: ", model.weights)
 
     blockchain = Blockchain()
-    blockchain.addBlock(str(weights))
+    blockchain.addBlock(str(model.weights))
     print('Adding to blockchain')
