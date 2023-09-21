@@ -1,3 +1,4 @@
+import copy
 import json
 import itertools
 from blockchain import Blockchain
@@ -98,7 +99,7 @@ def local_newton(whitelist=None):
 
     is_outlier = False
     for _ in range(1000000):
-        if (_ + 1) % 1000 == 0:
+        if (_ + 1) % 100 == 0:
             print('WHITELIST', whitelist)
 
             # Ensure all nodes are at this phase
@@ -107,8 +108,16 @@ def local_newton(whitelist=None):
             print('ACKs received')
 
             # Get weights of all nodes
-            print(model.weights)
-            send(py_socket, json.dumps(model.weights), 'WEIGHTS')
+            my_Weights = copy.deepcopy(model.weights)
+            my_weight_list = []
+
+            for arr in my_Weights:
+                my_weight_list.append(arr.tolist())
+
+            print(my_weight_list)
+
+
+            send(py_socket, json.dumps(my_weight_list), 'WEIGHTS')
             receieved_weights_all = recv(py_socket, 'WEIGHTS')
             receieved_weights_ip = []
             receieved_weights = []
@@ -139,6 +148,8 @@ def local_newton(whitelist=None):
                     for k in range(len(weight_sum[i][j])):
                         weight_sum[i][j][k] /= (len(receieved_weights)+1)
 
+
+            print(weight_sum)
 
             # total = np.sum(receieved_weights, axis=0)
             # weights = total / (len(receieved_weights) + 1)
