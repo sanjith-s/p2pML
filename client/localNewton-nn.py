@@ -10,8 +10,8 @@ from network import ANN
 
 LOCALHOST = socket.gethostbyname(socket.gethostname())  # '127.0.0.1'
 
-DATASET = 'node2_train.csv'  # 3x + 6
-TEST_DATASET = 'node2_test.csv'
+DATASET = 'node1_train.csv'  # 3x + 6
+TEST_DATASET = 'node1_test.csv'
 
 df = pd.read_csv(DATASET)
 
@@ -56,7 +56,7 @@ with open(file2_path, 'r') as cluster2_data:
 all_nodes = cluster1 + cluster2
 
 model = ANN(dim=(1,2,1), lr = ALPHA) #Initializing NeuralNet
-
+print(model.weights)
 
 
 def find_outliers(points, k):
@@ -98,7 +98,7 @@ def local_newton(whitelist=None):
         whitelist = []
 
     is_outlier = False
-    for _ in range(1000000):
+    for _ in range(1000):
         if (_ + 1) % 100 == 0:
             print('WHITELIST', whitelist)
 

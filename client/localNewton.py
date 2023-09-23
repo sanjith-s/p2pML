@@ -157,8 +157,8 @@ def local_newton(weights, whitelist=None):
         whitelist = []
 
     is_outlier = False
-    for _ in range(1000000):
-        if (_ + 1) % 1000 == 0:
+    for _ in range(1000):
+        if (_ + 1) % 100 == 0:
             print('WHITELIST', whitelist)
 
             # Ensure all nodes are at this phase
@@ -259,6 +259,7 @@ for combination in itertools.combinations(all_nodes, nodes // 2):
         continue
 
     count += 1
+    print(f"------------------ Combination {count} -----------------")
 
     cluster_ips = list(combination) if LOCALHOST in combination else [ip for ip in all_nodes
                                                                       if ip not in combination and ip != -1]
@@ -267,6 +268,7 @@ for combination in itertools.combinations(all_nodes, nodes // 2):
 
     send(py_socket, '[]', 'CLUSTER_ACK')
     recv(py_socket, 'CLUSTER_ACK')
+
 
 print(right, wrong)
 
