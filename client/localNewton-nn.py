@@ -20,7 +20,7 @@ trainY = df.iloc[:, -1].values
 
 trainY = trainY.reshape(-1, 1)
 
-ALPHA = 0.005 # Learning rate
+ALPHA = 0.005  # Learning rate
 
 MIN_THRESHOLD = 0.25
 MAX_THRESHOLD = 0.5
@@ -44,7 +44,6 @@ cluster2 = []
 file1_path = 'cluster_ips_a'
 file2_path = 'cluster_ips_b'
 
-
 with open(file1_path, 'r') as cluster1_data:
     for ip in cluster1_data:
         cluster1 += [ip[:-1]]
@@ -55,14 +54,12 @@ with open(file2_path, 'r') as cluster2_data:
 
 all_nodes = cluster1 + cluster2
 
-model = ANN(dim=(1,2,1), lr = ALPHA) #Initializing NeuralNet
+model = ANN(dim=(1, 2, 1), lr=ALPHA)  # Initializing NeuralNet
 print(model.weights)
 
 
 def find_outliers(points, k):
     print(points)
-
-
 
     mean = np.mean(points)
     std_dev = np.std(points)
@@ -77,19 +74,22 @@ def find_outliers(points, k):
     print('Z', z_scores)
     return outliers
 
-def swap_rows(cluster_a, cluster_b, k):
 
+def swap_rows(cluster_a, cluster_b, k):
     temp = cluster_a[len(cluster_a) - 1 - k]
     cluster_a[len(cluster_a) - 1 - k] = cluster_b[len(cluster_b) - 1 - k]
     cluster_b[len(cluster_b) - 1 - k] = temp
 
     print("DONE!!!!")
+
+
 def calc_error(x, y):
     error = 0
     for x, y in zip(testX, testY):
-        error += model.my_error(x,y)
+        error += model.my_error(x, y)
 
-    return (error/len(testX))[0]
+    return (error / len(testX))[0]
+
 
 def local_newton(whitelist=None):
     global right, wrong
@@ -115,7 +115,6 @@ def local_newton(whitelist=None):
                 my_weight_list.append(arr.tolist())
 
             print(my_weight_list)
-
 
             send(py_socket, json.dumps(my_weight_list), 'WEIGHTS')
             receieved_weights_all = recv(py_socket, 'WEIGHTS')
@@ -146,8 +145,7 @@ def local_newton(whitelist=None):
             for i in range(len(weight_sum)):
                 for j in range(len(weight_sum[i])):
                     for k in range(len(weight_sum[i][j])):
-                        weight_sum[i][j][k] /= (len(receieved_weights)+1)
-
+                        weight_sum[i][j][k] /= (len(receieved_weights) + 1)
 
             print(weight_sum)
 
@@ -195,12 +193,11 @@ def local_newton(whitelist=None):
 
                     del whitelist[index]
 
-
-
         model.train(trainX, trainY, 1)
 
         if (_ + 1) % 100 == 0:
             print('WEIGHTS', model.weights)
+
 
 nodes = len(all_nodes)  # len(cluster1) + len(cluster2)
 if nodes % 2 == 0:
@@ -210,7 +207,7 @@ count = 0
 for combination in itertools.combinations(all_nodes, nodes // 2):
     if -1 in combination:
         continue
-
+    print(f"------------------ Combination {count} -----------------")
     count += 1
 
     cluster_ips = list(combination) if LOCALHOST in combination else [ip for ip in all_nodes

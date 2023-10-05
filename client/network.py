@@ -139,7 +139,7 @@ class ANN():
 
         for epoch in range(epochs):
 
-            print(f"--------------- EPOCH {epoch + 1} STARTS ---------------")
+            # print(f"--------------- EPOCH {epoch + 1} STARTS ---------------")
             flat_weights = []
 
             for layer in self.weights:
@@ -158,12 +158,13 @@ class ANN():
 
             epoch_error = 0
             for i, j in zip(trainX, trainY):
+                # print(i, j)
                 final_grad = np.add(final_grad, np.array(grad(ex=i, why=j)).squeeze())
                 final_hess = np.add(final_hess, np.array(hess(ex=i, why=j)).squeeze())
 
                 epoch_error += self.my_error(i, j)
 
-            print(f"Average error: {epoch_error / len(trainX)}")
+            # print(f"Average error: {epoch_error / len(trainX)}")
 
             final_grad /= len(trainX)
             final_hess /= len(trainX)
