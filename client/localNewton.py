@@ -30,7 +30,7 @@ ALPHA = 0.005
 MIN_THRESHOLD = 0.25
 MAX_THRESHOLD = 0.5
 
-K = 2
+K = 0.8
 
 df = pd.read_csv(DATASET)
 
