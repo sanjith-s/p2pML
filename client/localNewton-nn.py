@@ -7,8 +7,11 @@ import socket
 import pandas as pd
 import numpy as np
 from network import ANN
+import time
 
 LOCALHOST = socket.gethostbyname(socket.gethostname())  # '127.0.0.1'
+
+tic = time.perf_counter()
 
 DATASET = 'node1_train.csv'  # 3x + 6
 TEST_DATASET = 'node1_test.csv'
@@ -247,3 +250,7 @@ if is_leader:
     blockchain = Blockchain()
     blockchain.addBlock(str(model.weights))
     print('Adding to blockchain')
+
+toc = time.perf_counter()
+
+print(f"Time elapsed {toc-tic} S")
