@@ -26,6 +26,7 @@ MIN_THRESHOLD = 0.25
 MAX_THRESHOLD = 0.5
 
 K = 1.2
+STD_THRESHOLD = 0
 
 df1 = pd.read_csv(TEST_DATASET)
 
@@ -61,10 +62,12 @@ print(model.weights)
 def find_outliers(points, k):
     print(points)
 
-    mean = np.mean(points)
-    std_dev = np.std(points)
+    mean = np.mean(np.sort(points))
+    std_dev = np.std(np.sort(points))
 
-    if std_dev == 0:
+    print(mean, std_dev)
+
+    if std_dev <= STD_THRESHOLD:
         return []
 
     z_scores = [(point - mean) / std_dev for point in points]
